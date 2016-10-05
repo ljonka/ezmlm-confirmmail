@@ -1,7 +1,7 @@
 # ezmlm-confirmmail
 Send confirmation mail for subscribe or unsubscribe to ezmlm mailinglist
 
-Place maillistapi.php to your webroot and change link in $strConfirmLink and other paths as needed on your server.
+Place maillistapi.php to your webroot, for most uberspace users default options should work out of the box.
 
 Usage:
 
