@@ -4,12 +4,8 @@
 */
 
 /*
- * This should be changed depending on your server config
+ * This can be changed depending on your server config, for uberspace this should work in most case
  */
-$strDefaultMailSuffix = "@transition-regensburg.de";
-$strConfirmLink = "https://zettel.apus.uberspace.de/maillistapi.php?type=confirm&hash=%s";
-$strListPath = "/home/zettel/mailinglisten/%s"; //this is realy server dependend
-$strConfirmDBPath = "/home/zettel/workspace/leon/mailinglistenconfirm.db"; //should be outside of webroot for security reason
 $strMailSubject = "Anfrage für Mailingliste bestätigen";
 
 $strMailSubMessage = "Hallo,
@@ -29,26 +25,15 @@ dies ist eine Sicherheitsueberpruefung zur Abbestellung der Mailingliste '%s', z
 ";
 
 $arrLists = array(
-        'bikesharing-alle',
-        'kuefa-alle', 
-        'repaircafe-alle', 
-        'technologie-alle',
-        'feste-ladenhelfer'=>'feste-ladenhelfer@wechselwelt.org',  
-        'oase-alle',  
-        'solawir-liste'=>'liste@solawir.de', 
-        'test-texte',
-        'food-coop-alle', 
-        'oeffentlichkeit',  
-        'strassenfest',          
-        'upcycling',
-        'gardening-alle',
-        'organisation',
-        'strassenfest-teilnehmer',
-        'wechselwelt-alle',
-        'herz-seele-alle',  
-        'regio-team-alle',
-        'technolgie-alle'
+
 );
+
+$strDefaultMailSuffix = "@" . $_SERVER["HTTP_HOST"];
+$strConfirmLink = $_SERVER["SCRIPT_URI"]."?type=confirm&hash=%s";
+$strCustomListPath = "/home/" . get_current_user() . "/mailinglisten/"; //change path if needed
+$strListPath = (!file_exists($strCustomListPath)) ? "/home/" . get_current_user() . "/ezmlm/%s" : $strCustomListPath . "%s"; //use uberspace default if not set
+$strConfirmDBPath = "/home/". get_current_user() ."/mailinglistenconfirm.db"; //should be outside of webroot for security reason
+
 
 /*
  * End of individual config, the rest should work as is in most cases
@@ -100,7 +85,8 @@ if($strType == "subscribe"){
 elseif($strType == "unsubscribe"){
 	$strHash = generateRandomString();
         $db->exec(sprintf($strInsertTable, $strTableName, $strType, $strMail, $strList, $strHash));
-        mail($strMail, $strMailSubject, sprintf($strMailUnsubMessage, $strList, sprintf($strConfirmLink, $strHash)));
+	$strListMail = (isset($arrLists[$strList])) ? $arrLists[$strList] : $strList . $strDefaultMailSuffix;
+        mail($strMail, $strMailSubject, sprintf($strMailUnsubMessage, $strListMail, sprintf($strConfirmLink, $strHash)));
 	echo "Confirmation mail send";
 }
 else if($strType == "confirm" && $strHash != null && strlen($strHash) >= 6){
